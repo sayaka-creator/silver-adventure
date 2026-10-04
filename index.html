@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鑑定マスター 〜スタッフ育成ポータル〜</title>
+<style>
+:root{--bg:#eef3fa;--card:#fff;--ink:#1e293b;--sub:#64748b;--line:#e2e8f0;--shadow:0 4px 16px rgba(30,41,59,.08),0 1px 3px rgba(30,41,59,.06);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#f8fafc 0%,#eef3fa 60%,#e6edf8 100%);color:var(--ink);
+ font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;min-height:100vh;}
+#app{max-width:920px;margin:0 auto;padding:18px 14px 60px;}
+.hero{text-align:center;padding:26px 10px 4px;}
+.hero h1{font-size:26px;font-weight:900;background:linear-gradient(135deg,#7c3aed,#2563eb,#d97706);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{color:var(--sub);font-size:13px;margin-top:6px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:16px;box-shadow:var(--shadow);}
+.staff-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.staff-row input{flex:1;min-width:180px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-size:15px;font-weight:700;}
+.btn{padding:12px 20px;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;background:#fff;border:2px solid var(--line);transition:.15s;box-shadow:var(--shadow);}
+.btn:active{transform:scale(.97);}
+.btn.primary{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff;border:none;}
+.btn.small{padding:8px 12px;font-size:12px;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.schip{padding:8px 14px;border-radius:999px;border:2px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.schip.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;}
+.schip .x{color:#dc2626;margin-left:6px;font-weight:900;}
+/* ---- hero character & roadmap ---- */
+.grow{display:flex;flex-direction:column;align-items:center;text-align:center;}
+.grow .chara{width:120px;height:120px;filter:drop-shadow(0 6px 12px rgba(30,41,59,.15));animation:bob 3s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.grow .rk{font-size:22px;font-weight:900;margin-top:6px;}
+.grow .rk-xp{font-size:13px;color:var(--sub);font-weight:700;}
+/* roadmap */
+.road{width:100%;margin-top:18px;}
+.roadline{position:relative;height:4px;background:#e2e8f0;border-radius:4px;margin:26px 8px 6px;}
+.roadline>i{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:4px;transition:width .5s;}
+.roaddots{display:flex;justify-content:space-between;margin:0 8px;transform:translateY(-14px);}
+.rd{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#cbd5e1;flex-shrink:0;}
+.rd.hit{border-color:#2563eb;background:#2563eb;color:#fff;font-weight:900;}
+.rd.cur{border-color:#f59e0b;background:#fffbeb;color:#b45309;box-shadow:0 0 0 4px rgba(245,158,11,.2);font-weight:900;}
+.roadlabels{display:flex;justify-content:space-between;margin:4px 0 0;font-size:10px;color:var(--sub);font-weight:700;}
+.roadlabels span{width:16%;text-align:center;}
+.roadnext{margin-top:10px;font-size:12.5px;font-weight:800;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:7px 16px;display:inline-block;}
+.roadnext small{display:block;font-weight:700;color:var(--sub);font-size:11px;}
+/* records */
+table.rec{width:100%;border-collapse:collapse;font-size:13px;}
+table.rec th{background:#f1f5f9;color:#334155;padding:8px 10px;text-align:left;font-size:12px;border-bottom:2px solid var(--line);}
+table.rec td{padding:9px 10px;border-bottom:1px solid var(--line);}
+table.rec tr:last-child td{border-bottom:none;}
+table.rec .gname{font-weight:800;}
+.minibar{height:8px;background:#eef2f7;border-radius:6px;overflow:hidden;min-width:70px;}
+.minibar>i{display:block;height:100%;border-radius:6px;}
+.rktag{font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;display:inline-block;}
+/* games grid */
+.games{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;}
+@media(max-width:640px){.games{grid-template-columns:1fr;}}
+.gcard{position:relative;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);transition:.15s;overflow:hidden;}
+.gcard:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(30,41,59,.14);}
+.gcard .em{font-size:40px;}
+.gcard h3{font-size:17px;margin-top:6px;}
+.gcard .cnt{font-size:12px;color:var(--sub);margin-top:2px;}
+.gcard .bar{height:10px;background:#eef2f7;border-radius:6px;overflow:hidden;margin-top:12px;}
+.gcard .bar>i{display:block;height:100%;border-radius:6px;transition:width .4s;}
+.gcard .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:5px;}
+.gcard .rank{font-size:12px;font-weight:800;margin-top:8px;}
+.gcard .open{display:block;text-align:center;margin-top:12px;padding:11px;border-radius:12px;color:#fff;font-weight:800;font-size:14px;text-decoration:none;}
+.gcard .ribbon{position:absolute;top:12px;right:-34px;transform:rotate(45deg);background:#f59e0b;color:#fff;font-size:10px;font-weight:800;padding:4px 40px;}
+.gcard .adminic{position:absolute;top:12px;right:14px;font-size:13px;text-decoration:none;opacity:.4;}
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;margin-top:16px;color:#78350f;}
+.total{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.tbox{flex:1;min-width:120px;background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;}
+.tbox b{display:block;font-size:22px;}
+.tbox span{font-size:11px;color:var(--sub);}
+.adminbar{display:flex;gap:8px;flex-wrap:wrap;}
+.abtn{display:inline-block;padding:10px 16px;border-radius:12px;background:#fff;border:2px dashed #cbd5e1;color:#64748b;font-size:13px;font-weight:800;text-decoration:none;transition:.15s;}
+.abtn:hover{border-color:#2563eb;color:#1d4ed8;}
+.sechead{font-size:14px;font-weight:900;margin:16px 0 8px;color:#334155;display:flex;align-items:center;gap:8px;}
+.sechead::after{content:"";flex:1;height:1px;background:var(--line);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hero">
+    <h1>💎 鑑定マスター 〜スタッフ育成ポータル〜 ⌚</h1>
+    <p>買取ユメノバ 研修ゲーム集 — スタッフを選んで、自分のレベルで今日も鍛えよう！</p>
+  </div>
+
+  <div class="card">
+    <div class="staff-row">
+      <input id="staffname" placeholder="スタッフ名を入力（例: 田中）" autocomplete="off">
+      <button class="btn primary" id="b-set">👤 この名前で開始</button>
+    </div>
+    <div class="chips" id="staffchips"></div>
+  </div>
+
+  <div class="card" id="portal" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:20px;font-weight:900;" id="hello"></div>
+      <span style="flex:1"></span>
+      <button class="btn small" onclick="location.reload()">🔄 更新</button>
+    </div>
+
+    <div class="grow" id="growbox" style="margin-top:10px;">
+      <div class="chara" id="chara"></div>
+      <div class="rk" id="rkname"></div>
+      <div class="rk-xp" id="rkxp"></div>
+      <div class="road">
+        <div class="roadline"><i id="roadfill"></i></div>
+        <div class="roaddots" id="roaddots"></div>
+        <div class="roadlabels" id="roadlabels"></div>
+        <div style="text-align:center;"><span class="roadnext" id="roadnext"></span></div>
+      </div>
+    </div>
+
+    <div class="total" id="total"></div>
+
+    <div class="sechead">📊 がんばりの記録（ゲーム別）</div>
+    <table class="rec" id="rectable"></table>
+
+    <div class="sechead">🎮 ゲーム一覧</div>
+    <div class="games" id="games"></div>
+
+    <div class="sechead">🛠 管理画面（管理者用）</div>
+    <div class="adminbar" id="adminbar"></div>
+
+    <div class="note">
+      💡 各ゲームの記録はスタッフ名ごとに保存されます。ゲーム内の <b>admin.html</b>（管理者用）で問題の編集・追加・画像差し替えができます（編集内容は全スタッフ共通で反映されます）。<br>
+      ※ 記録はこのブラウザに保存されます。別のPCに持っていく場合は、各ゲーム admin.html の「📦書き出し」をご利用ください。
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+const GAMES=[
+ {id:"brand",name:"ブランド鑑定マスター",emoji:"💎",key:"brandquest_v1",dir:"brand/",ac:"#7c3aed"},
+ {id:"watch",name:"時計鑑定マスター",emoji:"⌚",key:"watchquest_v1",dir:"watch/",ac:"#2563eb"},
+ {id:"gold",name:"金貨鑑定マスター",emoji:"🪙",key:"goldquest_v1",dir:"gold/",ac:"#d97706"},
+ {id:"jewel",name:"ジュエリー鑑定マスター",emoji:"💍",key:"jewelquest_v1",dir:"jewel/",ac:"#db2777"},
+];
+const DEFAULTS={brand:180,watch:120,gold:100,jewel:50};
+const RANKS=[[0,"見習い鑑定士","まずは名前から！"],[300,"初級鑑定士","見分けがついてきた！"],[800,"中級鑑定士","刻印も読める！"],[1500,"上級鑑定士","真贋が分かる！"],[2400,"プロ鑑定士","総合判断できる！"],[3200,"エース鑑定士","看板鑑定士！"]];
+function charaSVG(rk,accent){
+  const hats=[
+   `<circle cx="50" cy="24" r="8" fill="#fbbf24"/>`,
+   `<rect x="38" y="10" width="24" height="9" rx="4" fill="#60a5fa"/><rect x="32" y="18" width="36" height="4" rx="2" fill="#3b82f6"/>`,
+   `<rect x="34" y="6" width="32" height="11" rx="5" fill="#34d399"/><rect x="28" y="16" width="44" height="4" rx="2" fill="#059669"/><circle cx="50" cy="12" r="3" fill="#fff"/>`,
+   `<rect x="32" y="4" width="36" height="12" rx="6" fill="#f59e0b"/><rect x="26" y="15" width="48" height="5" rx="2" fill="#b45309"/><path d="M50 -2 l4 6 h-8z" fill="#ef4444"/>`,
+   `<rect x="32" y="4" width="36" height="12" rx="6" fill="#f59e0b"/><rect x="26" y="15" width="48" height="5" rx="2" fill="#b45309"/><path d="M50 -2 l4 6 h-8z" fill="#ef4444"/><circle cx="50" cy="42" r="6" fill="none" stroke="#f59e0b" stroke-width="2.5"/>`,
+   `<rect x="32" y="4" width="36" height="12" rx="6" fill="#fbbf24"/><rect x="26" y="15" width="48" height="5" rx="2" fill="#92400e"/><path d="M50 -2 l5 7 h-10z" fill="#ef4444"/><path d="M32 46 q18 10 36 0" stroke="#3b82f6" stroke-width="3" fill="none"/><circle cx="50" cy="56" r="8" fill="none" stroke="#f59e0b" stroke-width="3"/>`
+  ];
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+   <circle cx="50" cy="50" r="47" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+   <ellipse cx="50" cy="62" rx="20" ry="15" fill="#fde3c8"/>
+   <circle cx="43" cy="58" r="2.8" fill="#334155"/><circle cx="57" cy="58" r="2.8" fill="#334155"/>
+   <path d="M45 67 q5 3.5 10 0" stroke="#b45309" stroke-width="2" fill="none"/>
+   <ellipse cx="50" cy="82" rx="17" ry="11" fill="${accent}"/>
+   ${hats[Math.min(rk,hats.length-1)]}</svg>`;
+}
+function sKey(k){const st=currentStaff();return k+"__"+encodeURIComponent(st);}
+function currentStaff(){try{const d=JSON.parse(localStorage.getItem("portal_staff"));if(d&&d.name)return d.name;}catch(e){}return null;}
+function staffList(){try{const d=JSON.parse(localStorage.getItem("portal_staffs"));if(Array.isArray(d))return d;}catch(e){}return [];}
+function gameData(g){try{const d=JSON.parse(localStorage.getItem(sKey(g.key)));if(d)return d;}catch(e){}return null;}
+function fmt(){return decodeURIComponent(currentStaff());}
+function rankIdx(xp){let r=0;RANKS.forEach((x,i)=>{if(xp>=x[0])r=i;});return r;}
+function render(){
+  const st=currentStaff();
+  const box=document.getElementById("staffchips");box.innerHTML="";
+  staffList().forEach(n=>{
+    const b=document.createElement("button");b.className="schip"+(st===n?" on":"");
+    b.innerHTML=`👤 ${n}`+(st===n?` <span class="x" title="削除">×</span>`:"");
+    b.onclick=e=>{
+      if(e.target.classList.contains("x")){
+        if(confirm("スタッフ「"+n+"」の記録をすべて削除します。よろしいですか？")){
+          GAMES.forEach(g=>{localStorage.removeItem(g.key+"__"+encodeURIComponent(n));});
+          localStorage.setItem("portal_staffs",JSON.stringify(staffList().filter(x=>x!==n)));
+          if(st===n)localStorage.removeItem("portal_staff");
+          render();
+        }
+        return;
+      }
+      localStorage.setItem("portal_staff",JSON.stringify({name:n}));render();
+    };
+    box.appendChild(b);
+  });
+  if(!st){document.getElementById("portal").style.display="none";return;}
+  document.getElementById("portal").style.display="block";
+  document.getElementById("hello").textContent="👤 "+fmt()+" さん";
+
+  /* ---- growth: total XP across games -> shared rank ---- */
+  let totXp=0,totOk=0,totQ=0,totTry=0,totWrong=0;
+  GAMES.forEach(g=>{const d=gameData(g)||{xp:0,ans:{},wrong:{}};totXp+=d.xp||0;totOk+=Object.keys(d.ans||{}).length;
+    Object.values(d.wrong||{}).forEach(c=>totWrong+=c);totTry+=Object.keys(d.ans||{}).length+Object.keys(d.wrong||{}).length;totQ+=DEFAULTS[g.id];});
+  const r=rankIdx(totXp);
+  document.getElementById("chara").innerHTML=charaSVG(r,"#2563eb");
+  document.getElementById("rkname").textContent="🎖 "+RANKS[r][1];
+  document.getElementById("rkxp").textContent="合計 "+totXp+" XP（4ゲーム合計）";
+  // roadmap
+  const fill=document.getElementById("roadfill"),dots=document.getElementById("roaddots"),labels=document.getElementById("roadlabels");
+  const last=RANKS[RANKS.length-1][0];
+  fill.style.width=Math.min(100,(totXp/last*100)).toFixed(1)+"%";
+  dots.innerHTML="";labels.innerHTML="";
+  RANKS.forEach((x,i)=>{
+    const d=document.createElement("div");d.className="rd"+(i<r?" hit":i===r?" cur":"");d.textContent=i<r?"✓":i+1;
+    d.title=x[0]+" XP "+x[1];dots.appendChild(d);
+    const l=document.createElement("span");l.innerHTML=`${x[1]}<br><small>${x[0]+""}</small>`;l.style.opacity=i<=r?1:.55;labels.appendChild(l);
+  });
+  const nx=document.getElementById("roadnext");
+  if(r<RANKS.length-1){
+    const from=RANKS[r][0],to=RANKS[r+1][0],p=Math.round((totXp-from)/(to-from)*100);
+    nx.innerHTML=`次の階級「${RANKS[r+1][1]}」まで あと ${to-totXp} XP（${p}%）<small>${RANKS[r+1][2]}</small>`;
+  }else nx.innerHTML="🏆 全階級コンプリート！エース鑑定士です<small>4ゲーム制覇もぜひ目指そう</small>";
+
+  document.getElementById("total").innerHTML=`
+    <div class="tbox"><b>${totXp}</b><span>合計XP</span></div>
+    <div class="tbox"><b>${totOk}/${totQ}</b><span>正解済み問題</span></div>
+    <div class="tbox"><b>${totTry}</b><span>累計挑戦数</span></div>
+    <div class="tbox"><b>${totWrong}</b><span>誤答回数（成長の記録）</span></div>`;
+
+  /* ---- records table ---- */
+  const rt=document.getElementById("rectable");
+  let html=`<tr><th>ゲーム</th><th>正解済み</th><th>挑戦数</th><th>誤答</th><th>XP</th><th>階級</th><th style="width:90px;">進捗</th></tr>`;
+  GAMES.forEach(g=>{
+    const d=gameData(g)||{xp:0,ans:{},wrong:{}};
+    const ok=Object.keys(d.ans||{}).length, wcnt=Object.values(d.wrong||{}).reduce((a,b)=>a+b,0);
+    const tr=ok+Object.keys(d.wrong||{}).length, total=DEFAULTS[g.id], pct=Math.min(100,Math.round(ok/total*100));
+    const gr=rankIdx(d.xp||0);
+    html+=`<tr><td class="gname">${g.emoji} ${g.name}</td><td><b style="color:${g.ac};">${ok}</b>/${total}</td><td>${tr}</td><td>${wcnt}</td><td>${d.xp||0}</td><td><span class="rktag" style="background:${g.ac}1a;color:${g.ac};">${RANKS[gr][1]}</span></td><td><div class="minibar"><i style="width:${pct}%;background:${g.ac};"></i></div><small style="color:var(--sub);">${pct}%</small></td></tr>`;
+  });
+  rt.innerHTML=html;
+
+  /* ---- game cards ---- */
+  const gbox=document.getElementById("games");gbox.innerHTML="";
+  GAMES.forEach(g=>{
+    const d=gameData(g)||{xp:0,ans:{}};
+    const total=DEFAULTS[g.id], ok=Object.keys(d.ans||{}).length, pct=total?Math.min(100,Math.round(ok/total*100)):0;
+    let gr=0;RANKS.forEach((x,i)=>{if((d.xp||0)>=x[0])gr=i;});
+    const el=document.createElement("div");el.className="gcard";
+    el.innerHTML=`
+      ${pct===100?'<div class="ribbon">制覇!</div>':''}
+      <a class="adminic" href="${g.dir}admin.html" title="管理者用: 管理画面を開く（スタッフの方は操作不要です）">🛠</a>
+      <div class="em">${g.emoji}</div>
+      <h3>${g.name}</h3>
+      <div class="cnt">全${total}問</div>
+      <div class="bar"><i style="width:${pct}%;background:linear-gradient(90deg,${g.ac},${g.ac}99);"></i></div>
+      <div class="meta"><span>進捗 ${ok}/${total}問</span><span>${pct}%</span></div>
+      <div class="rank" style="color:${g.ac};">🎖 ${RANKS[gr][1]} ・ ${d.xp||0} XP</div>
+      <a class="open" style="background:linear-gradient(135deg,${g.ac},${g.ac}bb);" href="${g.dir}index.html">▶ ゲームを開く</a>`;
+    gbox.appendChild(el);
+  });
+
+  /* ---- admin section ---- */
+  const ab=document.getElementById("adminbar");
+  ab.innerHTML=GAMES.map(g=>`<a class="abtn" href="${g.dir}admin.html">🛠 ${g.name} 管理画面</a>`).join("");
+}
+document.getElementById("b-set").onclick=()=>{
+  const n=document.getElementById("staffname").value.trim();
+  if(!n){alert("スタッフ名を入力してください");return;}
+  const list=staffList();if(!list.includes(n))list.push(n);
+  localStorage.setItem("portal_staffs",JSON.stringify(list));
+  localStorage.setItem("portal_staff",JSON.stringify({name:n}));
+  document.getElementById("staffname").value="";
+  render();
+};
+document.getElementById("staffname").onkeydown=e=>{if(e.key==="Enter")document.getElementById("b-set").click();};
+render();
+</script>
+</body>
+</html>
